@@ -50,8 +50,8 @@ func TestUnregisteredParameter(t *testing.T) {
 		t.Error(err)
 	}
 
-	if parser.ParsedParameterCount != 1 {
-		t.Errorf("Invalid number of parsed parameters (%v, expected 1)", parser.ParsedParameterCount)
+	if parser.ParsedParameterCount() != 1 {
+		t.Errorf("Invalid number of parsed parameters (%v, expected 1)", parser.ParsedParameterCount())
 	}
 }
 
