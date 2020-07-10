@@ -10,4 +10,8 @@ Example:
 http://www.domain.com/search?q=alfa*&age=18-40&interests=alfa,beta,gamma&offset=10&size=15
 ```
 
+# TODO
+
+- [ ] Implement ToBleveSortSlice()
+
 MIT-licensed
