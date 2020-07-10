@@ -20,6 +20,7 @@ const (
 	wildCardCharacter           = "*"
 	rangeSeparatorCharacter     = "-"
 	listSeparatorCharacter      = ","
+	sortModifierCharacter       = "-"
 )
 
 var (

@@ -51,7 +51,7 @@ func TestStringsParameter(t *testing.T) {
 	}
 
 	expectedStrings := []string{"alfa", "beta", "gamma", "delta"}
-	if !testEq(parser.Parameters[0].StringsValue, expectedStrings) {
+	if !testEqString(parser.Parameters[0].StringsValue, expectedStrings) {
 		t.Fail()
 	}
 }
@@ -73,7 +73,7 @@ func TestEmptyStringsParameter(t *testing.T) {
 
 	expectedStrings := []string{}
 	generatedStrings := parser.Parameters[0].StringsValue
-	if !testEq(generatedStrings, expectedStrings) {
+	if !testEqString(generatedStrings, expectedStrings) {
 		t.Errorf("Expected '%v' got '%v'", expectedStrings, generatedStrings)
 	}
 }
@@ -208,7 +208,28 @@ func TestIntegerParameter(t *testing.T) {
 }
 
 // https://stackoverflow.com/a/15312097/254695
-func testEq(a, b []string) bool {
+func testEqString(a, b []string) bool {
+
+	// If one is nil, the other must also be nil.
+	if (a == nil) != (b == nil) {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+// https://stackoverflow.com/a/15312097/254695
+func testEqBool(a, b []bool) bool {
 
 	// If one is nil, the other must also be nil.
 	if (a == nil) != (b == nil) {

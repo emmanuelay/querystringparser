@@ -17,6 +17,10 @@ const (
 	// SearchString type is a wildcard pre/sufixed string
 	SearchString
 
+	// SortStrings type is a delimited array of strings that can have a directional modifier
+	// Ex: sort=name,-age,height -> This sorts 'name' ascending, 'age' descending, 'height' ascending
+	SortStrings
+
 	// IntegerRange type is a parameter that restricts input to an integer range
 	// Ex: age=18-30 -or- age=-30 -or- age=18-
 	IntegerRange
@@ -64,7 +68,9 @@ type Parameter struct {
 
 	// Strings specific variables
 	ListSeparatorCharacter string
+	SortModifierCharacter  string
 	StringsValue           []string
+	SortDirections         []bool // true = ascending, false = descending
 
 	// Integer specific variables
 	IntValue int
@@ -81,6 +87,7 @@ func NewParameter(parameter string) Parameter {
 		WildCardCharacter:       wildCardCharacter,
 		RangeSeparatorCharacter: rangeSeparatorCharacter,
 		ListSeparatorCharacter:  listSeparatorCharacter,
+		SortModifierCharacter:   sortModifierCharacter,
 		MinLength:               1,
 		MaxLength:               100,
 	}
@@ -92,6 +99,8 @@ func (p *Parameter) Parse(key, value string) error {
 	switch p.Type {
 	case Strings:
 		return p.parseStrings(key, value)
+	case SortStrings:
+		return p.parseSortStrings(key, value)
 	case IntegerRange:
 		return p.parseIntegerRange(key, value)
 	case SearchString:
@@ -101,8 +110,6 @@ func (p *Parameter) Parse(key, value string) error {
 	default:
 		return ErrInvalidType
 	}
-
-	return nil
 }
 
 func (p *Parameter) parseStrings(key, value string) error {
@@ -112,6 +119,32 @@ func (p *Parameter) parseStrings(key, value string) error {
 	} else {
 		p.StringsValue = items
 	}
+	return nil
+}
+
+func (p *Parameter) parseSortStrings(key, value string) error {
+	items := strings.Split(value, p.ListSeparatorCharacter)
+	if len(items) == 1 && len(items[0]) == 0 {
+		p.StringsValue = []string{}
+		p.SortDirections = []bool{}
+	}
+
+	outputItems := []string{}
+	outputDirections := []bool{}
+
+	for _, item := range items {
+		if strings.HasPrefix(item, p.SortModifierCharacter) {
+			outputItems = append(outputItems, strings.ReplaceAll(item, p.SortModifierCharacter, ""))
+			outputDirections = append(outputDirections, false)
+		} else {
+			outputItems = append(outputItems, item)
+			outputDirections = append(outputDirections, true)
+		}
+	}
+
+	p.StringsValue = outputItems
+	p.SortDirections = outputDirections
+
 	return nil
 }
 
@@ -167,11 +200,13 @@ func (p *Parameter) parseSearchString(key, value string) error {
 	}
 
 	strValue := strings.ReplaceAll(value, p.WildCardCharacter, "")
-	if len(strValue) > p.MaxLength {
+	if p.MaxLength > 0 && len(strValue) > p.MaxLength {
+		p.StringValue = strValue[:p.MaxLength]
 		return fmt.Errorf("Invalid length (%v) for parameter '%v' (max %v)", len(strValue), p.Name, p.MaxLength)
 	}
 
 	if len(strValue) < p.MinLength {
+		p.StringValue = strValue
 		return fmt.Errorf("Invalid length (%v) for parameter '%v' (min %v)", len(strValue), p.Name, p.MinLength)
 	}
 
@@ -185,6 +220,15 @@ func (p *Parameter) parseInteger(key, value string) error {
 	if err == ErrInvalidType {
 		return fmt.Errorf("Invalid type in integer value '%v' for parameter '%v'", val, p.Name)
 	}
+
+	if p.MaxValue != 0 && val > p.MaxValue {
+		val = p.MaxValue
+	}
+
+	if val < p.MinValue {
+		val = p.MinValue
+	}
+
 	p.IntValue = val
 
 	return nil
