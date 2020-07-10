@@ -71,7 +71,10 @@ type Parameter struct {
 	ListSeparatorCharacter string
 	SortModifierCharacter  string
 	StringsValue           []string
-	SortDirections         []bool // true = ascending, false = descending
+
+	// SortString specific variables
+	SortDirections []bool // true = ascending, false = descending
+	AllowedValues  []string
 
 	// Integer specific variables
 	IntValue int
@@ -120,6 +123,7 @@ func (p *Parameter) parseStrings(key, value string) error {
 	} else {
 		p.StringsValue = items
 	}
+	p.Parsed = true
 	return nil
 }
 
@@ -134,19 +138,37 @@ func (p *Parameter) parseSortStrings(key, value string) error {
 	outputDirections := []bool{}
 
 	for _, item := range items {
-		if strings.HasPrefix(item, p.SortModifierCharacter) {
-			outputItems = append(outputItems, strings.ReplaceAll(item, p.SortModifierCharacter, ""))
-			outputDirections = append(outputDirections, false)
-		} else {
-			outputItems = append(outputItems, item)
-			outputDirections = append(outputDirections, true)
+
+		hasSortModifierPrefix := strings.HasPrefix(item, p.SortModifierCharacter)
+		filteredItem := strings.ReplaceAll(item, p.SortModifierCharacter, "")
+
+		if !p.isAllowedValue(filteredItem) {
+			continue
 		}
+
+		outputItems = append(outputItems, filteredItem)
+		outputDirections = append(outputDirections, !hasSortModifierPrefix)
 	}
 
 	p.StringsValue = outputItems
 	p.SortDirections = outputDirections
 	p.Parsed = true
+
 	return nil
+}
+
+func (p *Parameter) isAllowedValue(value string) bool {
+	if len(p.AllowedValues) == 0 {
+		return true
+	}
+
+	for _, allowed := range p.AllowedValues {
+		if value == allowed {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (p *Parameter) parseIntegerRange(key, value string) error {
@@ -194,11 +216,11 @@ func (p *Parameter) parseSearchString(key, value string) error {
 	p.Position = Surrounded
 
 	if hasPrefix && !hasSuffix {
-		p.Position = Prefix
+		p.Position = Suffix
 	}
 
 	if !hasPrefix && hasSuffix {
-		p.Position = Suffix
+		p.Position = Prefix
 	}
 
 	strValue := strings.ReplaceAll(value, p.WildCardCharacter, "")
