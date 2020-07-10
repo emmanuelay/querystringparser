@@ -7,16 +7,30 @@ import (
 func TestStrings(t *testing.T) {
 	stringsParameter := NewParameter("interest")
 	stringsParameter.Type = Strings
-	err := stringsParameter.Parse("interest", "alfa,beta,gamma")
+	err := stringsParameter.Parse("interest", "alfa,beta,gamma,delta")
 	if err != nil {
 		t.Error(err)
 	}
 
-	if testEqString(stringsParameter.StringsValue, []string{"alfa", "beta", "gamma"}) != true {
+	if testEqString(stringsParameter.StringsValue, []string{"alfa", "beta", "gamma", "delta"}) != true {
 		t.Error("Invalid StringsValue")
 	}
 }
 
+func TestEmptyStringsParameter(t *testing.T) {
+
+	interestParameter := NewParameter("interest")
+	interestParameter.Type = Strings
+	err := interestParameter.Parse("interest", "")
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedStrings := []string{}
+	if testEqString(interestParameter.StringsValue, expectedStrings) != true {
+		t.Error("Invalid StringsValue")
+	}
+}
 func TestIntegerRange(t *testing.T) {
 	intRangeParameter := NewParameter("age")
 	intRangeParameter.Type = IntegerRange
@@ -215,4 +229,46 @@ func TestSortModifierParameter(t *testing.T) {
 		t.Error("Invalid SortDirections")
 	}
 
+}
+
+// https://stackoverflow.com/a/15312097/254695
+func testEqString(a, b []string) bool {
+
+	// If one is nil, the other must also be nil.
+	if (a == nil) != (b == nil) {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+// https://stackoverflow.com/a/15312097/254695
+func testEqBool(a, b []bool) bool {
+
+	// If one is nil, the other must also be nil.
+	if (a == nil) != (b == nil) {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
 }

@@ -45,10 +45,11 @@ const (
 
 // Parameter ...
 type Parameter struct {
-	Name       string
-	OutputName string
-	Type       Type
-	Output     bool
+	Name            string
+	OutputName      string
+	Type            Type
+	IncludeInOutput bool
+	Parsed          bool
 
 	// Range specific variables
 	RangeSeparatorCharacter string
@@ -82,7 +83,7 @@ type Parameter struct {
 func NewParameter(parameter string) Parameter {
 	return Parameter{
 		Name:                    parameter,
-		Output:                  true,
+		IncludeInOutput:         true,
 		OutputName:              parameter,
 		WildCardCharacter:       wildCardCharacter,
 		RangeSeparatorCharacter: rangeSeparatorCharacter,
@@ -144,7 +145,7 @@ func (p *Parameter) parseSortStrings(key, value string) error {
 
 	p.StringsValue = outputItems
 	p.SortDirections = outputDirections
-
+	p.Parsed = true
 	return nil
 }
 
@@ -180,6 +181,7 @@ func (p *Parameter) parseIntegerRange(key, value string) error {
 		p.MaxValue = rMin
 	}
 
+	p.Parsed = true
 	return nil
 }
 
@@ -200,6 +202,8 @@ func (p *Parameter) parseSearchString(key, value string) error {
 	}
 
 	strValue := strings.ReplaceAll(value, p.WildCardCharacter, "")
+	p.Parsed = len(strValue) > 0
+
 	if p.MaxLength > 0 && len(strValue) > p.MaxLength {
 		p.StringValue = strValue[:p.MaxLength]
 		return fmt.Errorf("Invalid length (%v) for parameter '%v' (max %v)", len(strValue), p.Name, p.MaxLength)
@@ -211,7 +215,6 @@ func (p *Parameter) parseSearchString(key, value string) error {
 	}
 
 	p.StringValue = strValue
-
 	return nil
 }
 
@@ -230,7 +233,7 @@ func (p *Parameter) parseInteger(key, value string) error {
 	}
 
 	p.IntValue = val
-
+	p.Parsed = true
 	return nil
 }
 

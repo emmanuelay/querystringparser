@@ -35,132 +35,23 @@ func TestNoParameter(t *testing.T) {
 	}
 }
 
-func TestStringsParameter(t *testing.T) {
-
-	queryString := "http://www.domain.com/search?interest=alfa,beta,gamma,delta"
+func TestUnregisteredParameter(t *testing.T) {
+	queryString := "http://www.domain.com/search?age=18-35&other=notreally"
 
 	parser := NewParser()
-	interestParameter := NewParameter("interest")
-	interestParameter.OutputName = "profile.interest"
-	interestParameter.Type = Strings
-	parser.AddParameter(interestParameter)
+	ageRangeParameter := NewParameter("age")
+	ageRangeParameter.Type = IntegerRange
+	ageRangeParameter.MinValue = 18
+	ageRangeParameter.MaxValue = 80
+	parser.AddParameter(ageRangeParameter)
 
 	err := parser.Parse(queryString)
 	if err != nil {
 		t.Error(err)
 	}
 
-	expectedStrings := []string{"alfa", "beta", "gamma", "delta"}
-	if !testEqString(parser.Parameters[0].StringsValue, expectedStrings) {
-		t.Fail()
-	}
-}
-
-func TestEmptyStringsParameter(t *testing.T) {
-
-	queryString := "http://www.domain.com/search?interest="
-
-	parser := NewParser()
-	interestParameter := NewParameter("interest")
-	interestParameter.OutputName = "profile.interest"
-	interestParameter.Type = Strings
-	parser.AddParameter(interestParameter)
-
-	err := parser.Parse(queryString)
-	if err != nil {
-		t.Error(err)
-	}
-
-	expectedStrings := []string{}
-	generatedStrings := parser.Parameters[0].StringsValue
-	if !testEqString(generatedStrings, expectedStrings) {
-		t.Errorf("Expected '%v' got '%v'", expectedStrings, generatedStrings)
-	}
-}
-
-func TestIntegerRangeParameter(t *testing.T) {
-
-	queryString := "http://www.domain.com/search?age=15-35"
-
-	parser := NewParser()
-	ageParameter := NewParameter("age")
-	ageParameter.Type = IntegerRange
-	ageParameter.MinValue = 10
-	ageParameter.MaxValue = 99
-	parser.AddParameter(ageParameter)
-
-	err := parser.Parse(queryString)
-	if err != nil {
-		t.Error(err)
-	}
-
-	p := parser.Parameters[0]
-	if p.MinValue != 15 || p.MaxValue != 35 {
-		t.Fail()
-	}
-}
-
-func TestInvalidIntegerRangeParameter(t *testing.T) {
-
-	queryString := "http://www.domain.com/search?age=45-35"
-
-	parser := NewParser()
-	ageParameter := NewParameter("age")
-	ageParameter.Type = IntegerRange
-	ageParameter.MinValue = 10
-	ageParameter.MaxValue = 99
-	parser.AddParameter(ageParameter)
-
-	err := parser.Parse(queryString)
-	if err != nil {
-		t.Error(err)
-	}
-
-	p := parser.Parameters[0]
-	if p.MinValue != 35 || p.MaxValue != 45 {
-		t.Fail()
-	}
-}
-
-func TestSearchStringParameter(t *testing.T) {
-	queryString := "https://www.domain.com/search?q=alfa*"
-
-	parser := NewParser()
-	searchStringParameter := NewParameter("q")
-	searchStringParameter.OutputNames = []string{"name", "lastname", "about"}
-	searchStringParameter.Type = SearchString
-	searchStringParameter.MaxLength = 80
-	parser.AddParameter(searchStringParameter)
-
-	err := parser.Parse(queryString)
-	if err != nil {
-		t.Error(err)
-	}
-
-	p := parser.Parameters[0]
-	if p.StringValue != "alfa" || p.Position != Suffix {
-		t.Fail()
-	}
-}
-
-func TestSearchStringParameterSurround(t *testing.T) {
-	queryString := "https://www.domain.com/search?q=*beta*"
-
-	parser := NewParser()
-	searchStringParameter := NewParameter("q")
-	searchStringParameter.OutputNames = []string{"name", "lastname", "about"}
-	searchStringParameter.Type = SearchString
-	searchStringParameter.MaxLength = 4
-	parser.AddParameter(searchStringParameter)
-
-	err := parser.Parse(queryString)
-	if err != nil {
-		t.Error(err)
-	}
-
-	p := parser.Parameters[0]
-	if p.StringValue != "beta" || p.Position != Surrounded {
-		t.Fail()
+	if parser.ParsedParameterCount != 1 {
+		t.Errorf("Invalid number of parsed parameters (%v, expected 1)", parser.ParsedParameterCount)
 	}
 }
 
@@ -181,7 +72,7 @@ func TestIntegerParameter(t *testing.T) {
 	offsetParameter.DefaultIntValue = 0
 	offsetParameter.MinValue = 0
 	offsetParameter.MaxValue = 1000
-	offsetParameter.Output = false
+	offsetParameter.IncludeInOutput = false
 	parser.AddParameter(offsetParameter)
 
 	sizeParameter := NewParameter("size")
@@ -189,7 +80,7 @@ func TestIntegerParameter(t *testing.T) {
 	sizeParameter.DefaultIntValue = 50
 	sizeParameter.MinValue = 50
 	sizeParameter.MaxValue = 500
-	sizeParameter.Output = false
+	sizeParameter.IncludeInOutput = false
 	parser.AddParameter(sizeParameter)
 
 	err := parser.Parse(queryString)
@@ -205,46 +96,4 @@ func TestIntegerParameter(t *testing.T) {
 	if val != 50 {
 		t.Fail()
 	}
-}
-
-// https://stackoverflow.com/a/15312097/254695
-func testEqString(a, b []string) bool {
-
-	// If one is nil, the other must also be nil.
-	if (a == nil) != (b == nil) {
-		return false
-	}
-
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-
-	return true
-}
-
-// https://stackoverflow.com/a/15312097/254695
-func testEqBool(a, b []bool) bool {
-
-	// If one is nil, the other must also be nil.
-	if (a == nil) != (b == nil) {
-		return false
-	}
-
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-
-	return true
 }

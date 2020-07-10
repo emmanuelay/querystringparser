@@ -8,9 +8,10 @@ import (
 
 // Parser ...
 type Parser struct {
-	Parameters         []Parameter
-	ParameterSeparator string
-	KeyValueSeparator  string
+	Parameters           []Parameter
+	ParameterSeparator   string
+	KeyValueSeparator    string
+	ParsedParameterCount int
 }
 
 const (
@@ -43,8 +44,9 @@ var (
 // NewParser creates a Parser-instance
 func NewParser() *Parser {
 	return &Parser{
-		ParameterSeparator: parameterSeparatorCharacter,
-		KeyValueSeparator:  keyValueSeparatorCharacter,
+		ParameterSeparator:   parameterSeparatorCharacter,
+		KeyValueSeparator:    keyValueSeparatorCharacter,
+		ParsedParameterCount: 0,
 	}
 }
 
@@ -91,6 +93,8 @@ func (p *Parser) Parse(queryString string) error {
 		if err != nil {
 			return err
 		}
+
+		p.ParsedParameterCount++
 	}
 
 	return nil
