@@ -8,10 +8,9 @@ import (
 
 // Parser ...
 type Parser struct {
-	Parameters           []Parameter
-	ParameterSeparator   string
-	KeyValueSeparator    string
-	ParsedParameterCount int
+	Parameters         []Parameter
+	ParameterSeparator string
+	KeyValueSeparator  string
 }
 
 const (
@@ -44,15 +43,14 @@ var (
 // NewParser creates a Parser-instance
 func NewParser() *Parser {
 	return &Parser{
-		ParameterSeparator:   parameterSeparatorCharacter,
-		KeyValueSeparator:    keyValueSeparatorCharacter,
-		ParsedParameterCount: 0,
+		ParameterSeparator: parameterSeparatorCharacter,
+		KeyValueSeparator:  keyValueSeparatorCharacter,
 	}
 }
 
 // AddParameter adds a parameter to the parser
 func (p *Parser) AddParameter(parameter Parameter) {
-	if p.Parameters != nil {
+	if p.Parameters == nil {
 		parameters := []Parameter{parameter}
 		p.Parameters = parameters
 		return
@@ -93,8 +91,6 @@ func (p *Parser) Parse(queryString string) error {
 		if err != nil {
 			return err
 		}
-
-		p.ParsedParameterCount++
 	}
 
 	return nil
@@ -122,4 +118,15 @@ func (p *Parser) getParameter(key string) (*Parameter, error) {
 		}
 	}
 	return nil, ErrNoParameter
+}
+
+// ParsedParameterCount returns the number of parsed parameters
+func (p *Parser) ParsedParameterCount() int {
+	counter := 0
+	for _, parameter := range p.Parameters {
+		if parameter.Parsed {
+			counter++
+		}
+	}
+	return counter
 }
