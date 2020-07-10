@@ -138,7 +138,8 @@ func TestSearchStringSuffix(t *testing.T) {
 		t.Error("Invalid string")
 	}
 
-	if searchStringParameter.Position != Suffix {
+	// In "alfa*", "alfa" is a prefix
+	if searchStringParameter.Position != Prefix {
 		t.Error("Invalid position")
 	}
 }
@@ -155,7 +156,8 @@ func TestSearchStringPrefix(t *testing.T) {
 		t.Error("Invalid string")
 	}
 
-	if searchStringParameter.Position != Prefix {
+	// In "*beta", "beta" is a suffix
+	if searchStringParameter.Position != Suffix {
 		t.Error("Invalid position")
 	}
 }
@@ -208,7 +210,7 @@ func TestSearchStringSuffixedMinLength(t *testing.T) {
 		t.Error("Invalid resulting string", searchStringParameter.StringValue)
 	}
 
-	if searchStringParameter.Position != Suffix {
+	if searchStringParameter.Position != Prefix {
 		t.Error("Invalid position")
 	}
 }
@@ -216,7 +218,8 @@ func TestSearchStringSuffixedMinLength(t *testing.T) {
 func TestSortModifierParameter(t *testing.T) {
 	sortModifierParameter := NewParameter("sort")
 	sortModifierParameter.Type = SortStrings
-	err := sortModifierParameter.Parse("sort", "name,-age,height")
+	sortModifierParameter.AllowedValues = []string{"age", "name", "height"}
+	err := sortModifierParameter.Parse("sort", "name,banana,should,-age,not,even,parse,height,this")
 	if err != nil {
 		t.Error(err)
 	}
