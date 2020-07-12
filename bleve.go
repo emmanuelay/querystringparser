@@ -32,16 +32,25 @@ func (p *Parser) ToBleveQuery() (string, error) {
 
 // ToBleveQuery returns a Bleve-compatible query parameter
 func (p *Parameter) ToBleveQuery() (string, error) {
+
+	conditionalModifier := ""
+	switch p.OutputCondition {
+	case Must:
+		conditionalModifier = "+"
+	case Not:
+		conditionalModifier = "-"
+	}
+
 	switch p.Type {
 
 	case Integer:
-		return fmt.Sprintf("%v:%v", p.OutputName, p.IntValue), nil
+		return fmt.Sprintf("%v%v:%v", conditionalModifier, p.OutputName, p.IntValue), nil
 
 	case IntegerRange:
-		return fmt.Sprintf("%v:>=%v %v:<=%v", p.OutputName, p.MinValue, p.Name, p.MaxValue), nil
+		return fmt.Sprintf("%v%v:>=%v %v%v:<=%v", conditionalModifier, p.OutputName, p.MinValue, conditionalModifier, p.Name, p.MaxValue), nil
 
 	case Strings:
-		return fmt.Sprintf("%v:%v", p.OutputName, strings.Join(p.StringsValue, ",")), nil
+		return fmt.Sprintf("%v%v:%v", conditionalModifier, p.OutputName, strings.Join(p.StringsValue, ",")), nil
 
 	case SearchString:
 		{
@@ -53,13 +62,13 @@ func (p *Parameter) ToBleveQuery() (string, error) {
 			switch p.Position {
 
 			case Prefix:
-				return fmt.Sprintf("%v%v*", fieldName, p.StringValue), nil
+				return fmt.Sprintf("%v%v%v*", conditionalModifier, fieldName, p.StringValue), nil
 
 			case Suffix:
-				return fmt.Sprintf("%v*%v", fieldName, p.StringValue), nil
+				return fmt.Sprintf("%v%v*%v", conditionalModifier, fieldName, p.StringValue), nil
 
 			default:
-				return fmt.Sprintf("%v*%v*", fieldName, p.StringValue), nil
+				return fmt.Sprintf("%v%v*%v*", conditionalModifier, fieldName, p.StringValue), nil
 			}
 		}
 	}

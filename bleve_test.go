@@ -8,22 +8,27 @@ func TestToBleveQuery(t *testing.T) {
 
 	parser := NewParser()
 
-	interestParameter := NewParameter("interests")
-	interestParameter.Type = Strings
-	interestParameter.OutputName = "profile.interest"
-	parser.AddParameter(interestParameter)
+	searchStringParameter := NewParameter("q", SearchString)
+	searchStringParameter.OutputName = ""
+	searchStringParameter.MaxLength = 80
+	searchStringParameter.OutputCondition = Must
+	parser.AddParameter(searchStringParameter)
 
-	villageParameter := NewParameter("villages")
-	villageParameter.Type = Strings
-	villageParameter.OutputName = "profile.villages"
-	parser.AddParameter(villageParameter)
-
-	ageParameter := NewParameter("age")
-	ageParameter.Type = IntegerRange
-	ageParameter.OutputName = "age"
+	ageParameter := NewParameter("age", IntegerRange)
 	ageParameter.MinValue = 0
 	ageParameter.MaxValue = 99
+	ageParameter.OutputCondition = Must
 	parser.AddParameter(ageParameter)
+
+	villageParameter := NewParameter("villages", Strings)
+	villageParameter.OutputName = "profile.villages"
+	villageParameter.OutputCondition = Must
+	parser.AddParameter(villageParameter)
+
+	interestParameter := NewParameter("interests", Strings)
+	interestParameter.OutputName = "profile.interest"
+	interestParameter.OutputCondition = Must
+	parser.AddParameter(interestParameter)
 
 	//registrationDateParameter := NewParameter("reg")
 	//registrationDateParameter.OutputName = "created_at"
@@ -31,35 +36,26 @@ func TestToBleveQuery(t *testing.T) {
 	//registrationDateParameter.DateFormat = "yyyyMMdd"
 	//parser.AddParameter(registrationDateParameter)
 
-	searchStringParameter := NewParameter("q")
-	searchStringParameter.Type = SearchString
-	searchStringParameter.OutputName = ""
-	searchStringParameter.MaxLength = 80
-	parser.AddParameter(searchStringParameter)
-
-	offsetParameter := NewParameter("offset")
-	offsetParameter.Type = Integer
+	offsetParameter := NewParameter("offset", Integer)
 	offsetParameter.DefaultIntValue = 0
 	offsetParameter.MinValue = 0
 	offsetParameter.MaxValue = 999
 	offsetParameter.IncludeInOutput = false
 	parser.AddParameter(offsetParameter)
 
-	sizeParameter := NewParameter("size")
-	sizeParameter.Type = Integer
+	sizeParameter := NewParameter("size", Integer)
 	sizeParameter.DefaultIntValue = 50
 	sizeParameter.MinValue = 50
 	sizeParameter.MaxValue = 500
 	sizeParameter.IncludeInOutput = false
 	parser.AddParameter(sizeParameter)
 
-	sortParameter := NewParameter("sort")
-	sortParameter.Type = SortStrings
+	sortParameter := NewParameter("sort", SortStrings)
 	sortParameter.AllowedValues = []string{"age", "name", "last_online"}
 	sortParameter.IncludeInOutput = false
 	parser.AddParameter(sortParameter)
 
-	queryString := "http://www.domain.com/search?q=*hello*&age=18-45&villages=alfa,beta&interests=gamma,delta&sort=-age,name,-last_online&size=100&offset=50"
+	queryString := "http://www.domain.com/search?q=*hello*&age=18-45&villages=alfa,beta&interests=gamma,delta&sort=-age,name,-last_online&size=100&offset=99150"
 	err := parser.Parse(queryString)
 	if err != nil {
 		t.Error(err)
@@ -74,7 +70,7 @@ func TestToBleveQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	bleveString := "profile.interest:gamma,delta profile.villages:alfa,beta age:>=18 age:<=45 *hello*"
+	bleveString := "+*hello* +age:>=18 +age:<=45 +profile.villages:alfa,beta +profile.interest:gamma,delta"
 	if query != bleveString {
 		t.Errorf("Expected '%v' got '%v'", bleveString, query)
 	}
@@ -93,8 +89,8 @@ func TestToBleveQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	if intOffset != 50 {
-		t.Error("Offset should be 50")
+	if intOffset != 999 {
+		t.Error("Offset should be 999")
 	}
 
 	expectedSortSlice := []string{"-age", "name", "-last_online"}
