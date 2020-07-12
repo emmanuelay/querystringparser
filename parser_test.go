@@ -53,6 +53,25 @@ func TestUnregisteredParameter(t *testing.T) {
 	}
 }
 
+func TestOnlyParameters(t *testing.T) {
+	queryString := "age=18-35&other=notreally"
+
+	parser := NewParser()
+	ageRangeParameter := NewParameter("age", IntegerRange)
+	ageRangeParameter.MinValue = 18
+	ageRangeParameter.MaxValue = 80
+	parser.AddParameter(ageRangeParameter)
+
+	err := parser.Parse(queryString)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if parser.ParsedParameterCount() != 1 {
+		t.Errorf("Invalid number of parsed parameters (%v, expected 1)", parser.ParsedParameterCount())
+	}
+}
+
 func TestIntegerParameter(t *testing.T) {
 
 	queryString := "https://www.domain.com/search?q=alfa*&offset=1&size=50"
