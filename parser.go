@@ -67,17 +67,29 @@ func (p *Parser) Parse(queryString string) error {
 		return ErrNoParameters
 	}
 
+	paramString := queryString
+
 	// http://www.domain.com/search <-> ?parameter=value
-	query := strings.Split(queryString, querySeparator)
-	if len(query) == 1 || len(query[1]) == 0 {
-		return ErrNoQueryString
+	if strings.Contains(queryString, querySeparator) {
+		query := strings.Split(queryString, querySeparator)
+		if len(query) == 1 || len(query[1]) == 0 {
+			return ErrNoQueryString
+		}
+		paramString = query[1]
 	}
 
 	// http://www.domain.com/search? parameter=value <-> &parameter2=value
-	queryParameters := strings.Split(query[1], p.ParameterSeparator)
+	queryParameters := strings.Split(paramString, p.ParameterSeparator)
+	if len(queryParameters) == 0 {
+		return ErrNoParameters
+	}
 
 	for _, queryParameter := range queryParameters {
 		keyValue := strings.Split(queryParameter, p.KeyValueSeparator)
+
+		if len(keyValue) < 2 {
+			continue
+		}
 
 		key := keyValue[0]
 		value := keyValue[1]

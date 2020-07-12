@@ -13,8 +13,8 @@ func TestNoQuery(t *testing.T) {
 
 	queryStringNoQuery := "http://www.domain.com/search"
 	err := parser.Parse(queryStringNoQuery)
-	if err != ErrNoQueryString {
-		t.Fail()
+	if err != nil {
+		t.Error("Expected Error")
 	}
 
 	queryStringEmptyQuery := "http://www.domain.com/search?"
