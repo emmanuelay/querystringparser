@@ -7,9 +7,8 @@ import (
 func TestNoQuery(t *testing.T) {
 
 	parser := NewParser()
-	interestParameter := NewParameter("interest")
+	interestParameter := NewParameter("interest", Strings)
 	interestParameter.OutputName = "profile.interest"
-	interestParameter.Type = Strings
 	parser.AddParameter(interestParameter)
 
 	queryStringNoQuery := "http://www.domain.com/search"
@@ -39,8 +38,7 @@ func TestUnregisteredParameter(t *testing.T) {
 	queryString := "http://www.domain.com/search?age=18-35&other=notreally"
 
 	parser := NewParser()
-	ageRangeParameter := NewParameter("age")
-	ageRangeParameter.Type = IntegerRange
+	ageRangeParameter := NewParameter("age", IntegerRange)
 	ageRangeParameter.MinValue = 18
 	ageRangeParameter.MaxValue = 80
 	parser.AddParameter(ageRangeParameter)
@@ -61,22 +59,19 @@ func TestIntegerParameter(t *testing.T) {
 
 	parser := NewParser()
 
-	searchStringParameter := NewParameter("q")
+	searchStringParameter := NewParameter("q", SearchString)
 	searchStringParameter.OutputNames = []string{"name", "lastname", "about"}
-	searchStringParameter.Type = SearchString
 	searchStringParameter.MaxLength = 4
 	parser.AddParameter(searchStringParameter)
 
-	offsetParameter := NewParameter("offset")
-	offsetParameter.Type = Integer
+	offsetParameter := NewParameter("offset", Integer)
 	offsetParameter.DefaultIntValue = 0
 	offsetParameter.MinValue = 0
 	offsetParameter.MaxValue = 1000
 	offsetParameter.IncludeInOutput = false
 	parser.AddParameter(offsetParameter)
 
-	sizeParameter := NewParameter("size")
-	sizeParameter.Type = Integer
+	sizeParameter := NewParameter("size", Integer)
 	sizeParameter.DefaultIntValue = 50
 	sizeParameter.MinValue = 50
 	sizeParameter.MaxValue = 500
