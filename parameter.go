@@ -117,6 +117,8 @@ func NewParameter(parameter string, parameterType Type) Parameter {
 // Parse performs a parameter parse of a key/value-pair
 func (p *Parameter) Parse(key, value string) error {
 
+	// TODO(ea): 'key' is not needed
+
 	switch p.Type {
 	case Strings:
 		return p.parseStrings(key, value)

@@ -91,6 +91,21 @@ func TestInteger(t *testing.T) {
 	}
 }
 
+func TestEmptyInteger(t *testing.T) {
+	integerParameter := NewParameter("count", Integer)
+	integerParameter.MinValue = 10
+	integerParameter.MaxValue = 100
+	integerParameter.DefaultIntValue = 11
+	err := integerParameter.Parse("apa", "20")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if integerParameter.IntValue != 20 {
+		t.Error("Invalid IntValue")
+	}
+}
+
 func TestIntegerRoof(t *testing.T) {
 	integerParameter := NewParameter("offset", Integer)
 	integerParameter.MaxValue = 100

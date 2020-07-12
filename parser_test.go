@@ -111,3 +111,47 @@ func TestIntegerParameter(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestDefaultIntegerParameter(t *testing.T) {
+
+	queryString := "https://www.domain.com/search?offset=1"
+
+	parser := NewParser()
+
+	offsetParameter := NewParameter("offset", Integer)
+	offsetParameter.DefaultIntValue = 0
+	offsetParameter.MinValue = 0
+	offsetParameter.MaxValue = 1000
+	offsetParameter.IncludeInOutput = false
+	parser.AddParameter(offsetParameter)
+
+	sizeParameter := NewParameter("size", Integer)
+	sizeParameter.DefaultIntValue = 60
+	sizeParameter.MinValue = 50
+	sizeParameter.MaxValue = 500
+	sizeParameter.IncludeInOutput = false
+	parser.AddParameter(sizeParameter)
+
+	err := parser.Parse(queryString)
+	if err != nil {
+		t.Error(err)
+	}
+
+	size, err := parser.GetIntValue("size")
+	if err != nil {
+		t.Fail()
+	}
+
+	if size != 60 {
+		t.Fail()
+	}
+
+	offset, err := parser.GetIntValue("offset")
+	if err != nil {
+		t.Fail()
+	}
+
+	if offset != 1 {
+		t.Fail()
+	}
+}

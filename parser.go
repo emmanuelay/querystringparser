@@ -119,6 +119,10 @@ func (p *Parser) GetIntValue(key string) (int, error) {
 		return -1, fmt.Errorf("Invalid parameter type for parameter '%v' (expected Integer)", parameter.Name)
 	}
 
+	if !parameter.Parsed {
+		parameter.IntValue = parameter.DefaultIntValue
+	}
+
 	return parameter.IntValue, nil
 }
 
