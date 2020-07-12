@@ -1,7 +1,6 @@
 package querystringparser
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -60,7 +59,7 @@ func TestToBleveQuery(t *testing.T) {
 	sortParameter.IncludeInOutput = false
 	parser.AddParameter(sortParameter)
 
-	queryString := "http://www.domain.com/search?q=hello*&age=18-45&villages=alfa,beta&interests=gamma,delta&sort=age,name,-last_online&size=100&offset=50"
+	queryString := "http://www.domain.com/search?q=*hello*&age=18-45&villages=alfa,beta&interests=gamma,delta&sort=-age,name,-last_online&size=100&offset=50"
 	err := parser.Parse(queryString)
 	if err != nil {
 		t.Error(err)
@@ -75,8 +74,10 @@ func TestToBleveQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println("in :", queryString)
-	fmt.Println("out:", query)
+	bleveString := "profile.interest:gamma,delta profile.villages:alfa,beta age:>=18 age:<=45 *hello*"
+	if query != bleveString {
+		t.Errorf("Expected '%v' got '%v'", bleveString, query)
+	}
 
 	intSize, err := parser.GetIntValue("size")
 	if err != nil {
@@ -96,5 +97,14 @@ func TestToBleveQuery(t *testing.T) {
 		t.Error("Offset should be 50")
 	}
 
-	fmt.Println(parser.ToBleveSortSlice("sort"))
+	expectedSortSlice := []string{"-age", "name", "-last_online"}
+	sortSlice, err := parser.ToBleveSortSlice("sort")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !testEqString(expectedSortSlice, sortSlice) {
+		t.Errorf("Expected '%v' got '%v'", expectedSortSlice, sortSlice)
+	}
+	//fmt.Println(parser.ToBleveSortSlice("sort"))
 }

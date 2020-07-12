@@ -12,6 +12,14 @@ http://www.domain.com/search?q=alfa*&age=18-40&interests=alfa,beta,gamma&offset=
 
 # TODO
 
-- [ ] Implement ToBleveSortSlice()
+- [ ] Bleve support
+	- [ ] Add support for MUST(+), NOT(-) and SHOULD(..) for each parameter
+	- [ ] Ensure order of parameters in output corresponds to that of input
+- [ ] Implement support for date ranges 
+	- [ ] Validate date (check format and content)
+	- [ ] Explicit range (?range=20200101-20200304)
+	- [ ] Implicit range, ends with (?range=-20200304)
+	- [ ] Implicit range, begins with (?range=20200101-)
+
 
 MIT-licensed
