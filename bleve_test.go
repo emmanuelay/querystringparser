@@ -95,4 +95,6 @@ func TestToBleveQuery(t *testing.T) {
 	if intOffset != 50 {
 		t.Error("Offset should be 50")
 	}
+
+	fmt.Println(parser.ToBleveSortSlice("sort"))
 }

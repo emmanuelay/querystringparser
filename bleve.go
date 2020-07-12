@@ -1,6 +1,7 @@
 package querystringparser
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -65,10 +66,37 @@ func (p *Parameter) ToBleveQuery() (string, error) {
 	return "N/A", nil
 }
 
+// ErrInvalidParameter ...
+var ErrInvalidParameter = errors.New("Invalid parameter type, expected 'SortStrings'")
+
 // ToBleveSortSlice returns a slice of strings to be used as a sort modifier by Bleve
 func (p *Parameter) ToBleveSortSlice() ([]string, error) {
-	// TODO(ea): Return string slice with sort modifier
-	// TODO(ea): Example: []string{"age", "-_score", "_id"}
+	if p.Type != SortStrings {
+		return nil, ErrInvalidParameter
+	}
 
-	return nil, nil
+	output := []string{}
+	for idx, val := range p.StringsValue {
+		sortDirection := p.SortDirections[idx]
+		var item string
+		if sortDirection == false {
+			item = fmt.Sprintf("%v%v", p.SortModifierCharacter, val)
+		} else {
+			item = val
+		}
+		output = append(output, item)
+	}
+
+	return output, nil
+}
+
+// ToBleveSortSlice retrieves a string-slice in a Bleve-compatible format (SortBy)
+func (p *Parser) ToBleveSortSlice(sortParameterName string) ([]string, error) {
+	parameter, err := p.getParameter(sortParameterName)
+	if err != nil {
+		return nil, err
+	}
+
+	sortSlice, err := parameter.ToBleveSortSlice()
+	return sortSlice, err
 }
