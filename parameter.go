@@ -43,6 +43,20 @@ const (
 	Surrounded
 )
 
+// Condition denotes which type of comparison is expected
+type Condition int
+
+const (
+	// Must denotes that a parameter is required
+	Must Condition = iota
+
+	// Should denotes that a parameter is optional
+	Should
+
+	// Not denotes that a parameter is required to *not* be met
+	Not
+)
+
 // Parameter ...
 type Parameter struct {
 	Name            string
@@ -50,6 +64,7 @@ type Parameter struct {
 	Type            Type
 	IncludeInOutput bool
 	Parsed          bool
+	OutputCondition Condition
 
 	// Range specific variables
 	RangeSeparatorCharacter string
@@ -83,9 +98,10 @@ type Parameter struct {
 }
 
 // NewParameter creates a new parameter with default configuration
-func NewParameter(parameter string) Parameter {
+func NewParameter(parameter string, parameterType Type) Parameter {
 	return Parameter{
 		Name:                    parameter,
+		Type:                    parameterType,
 		IncludeInOutput:         true,
 		OutputName:              parameter,
 		WildCardCharacter:       wildCardCharacter,
@@ -94,6 +110,7 @@ func NewParameter(parameter string) Parameter {
 		SortModifierCharacter:   sortModifierCharacter,
 		MinLength:               1,
 		MaxLength:               100,
+		OutputCondition:         Should,
 	}
 }
 

@@ -5,8 +5,7 @@ import (
 )
 
 func TestStrings(t *testing.T) {
-	stringsParameter := NewParameter("interest")
-	stringsParameter.Type = Strings
+	stringsParameter := NewParameter("interest", Strings)
 	err := stringsParameter.Parse("interest", "alfa,beta,gamma,delta")
 	if err != nil {
 		t.Error(err)
@@ -19,8 +18,7 @@ func TestStrings(t *testing.T) {
 
 func TestEmptyStringsParameter(t *testing.T) {
 
-	interestParameter := NewParameter("interest")
-	interestParameter.Type = Strings
+	interestParameter := NewParameter("interest", Strings)
 	err := interestParameter.Parse("interest", "")
 	if err != nil {
 		t.Error(err)
@@ -32,8 +30,7 @@ func TestEmptyStringsParameter(t *testing.T) {
 	}
 }
 func TestIntegerRange(t *testing.T) {
-	intRangeParameter := NewParameter("age")
-	intRangeParameter.Type = IntegerRange
+	intRangeParameter := NewParameter("age", IntegerRange)
 	err := intRangeParameter.Parse("age", "118-35")
 	if err != nil {
 		t.Error(err)
@@ -49,8 +46,7 @@ func TestIntegerRange(t *testing.T) {
 }
 
 func TestIntegerRangeMinDefault(t *testing.T) {
-	intRangeParameter := NewParameter("age")
-	intRangeParameter.Type = IntegerRange
+	intRangeParameter := NewParameter("age", IntegerRange)
 	intRangeParameter.MinValue = 10
 	err := intRangeParameter.Parse("age", "-35")
 	if err != nil {
@@ -67,8 +63,7 @@ func TestIntegerRangeMinDefault(t *testing.T) {
 }
 
 func TestIntegerRangeMaxDefault(t *testing.T) {
-	intRangeParameter := NewParameter("age")
-	intRangeParameter.Type = IntegerRange
+	intRangeParameter := NewParameter("age", IntegerRange)
 	intRangeParameter.MaxValue = 80
 	err := intRangeParameter.Parse("age", "18-")
 	if err != nil {
@@ -85,8 +80,7 @@ func TestIntegerRangeMaxDefault(t *testing.T) {
 }
 
 func TestInteger(t *testing.T) {
-	integerParameter := NewParameter("count")
-	integerParameter.Type = Integer
+	integerParameter := NewParameter("count", Integer)
 	err := integerParameter.Parse("count", "18")
 	if err != nil {
 		t.Error(err)
@@ -98,8 +92,7 @@ func TestInteger(t *testing.T) {
 }
 
 func TestIntegerRoof(t *testing.T) {
-	integerParameter := NewParameter("offset")
-	integerParameter.Type = Integer
+	integerParameter := NewParameter("offset", Integer)
 	integerParameter.MaxValue = 100
 	err := integerParameter.Parse("offset", "118")
 	if err != nil {
@@ -112,8 +105,7 @@ func TestIntegerRoof(t *testing.T) {
 }
 
 func TestIntegerFloor(t *testing.T) {
-	integerParameter := NewParameter("offset")
-	integerParameter.Type = Integer
+	integerParameter := NewParameter("offset", Integer)
 	integerParameter.MaxValue = 100
 	integerParameter.MinValue = 10
 	err := integerParameter.Parse("offset", "8")
@@ -127,8 +119,7 @@ func TestIntegerFloor(t *testing.T) {
 }
 
 func TestSearchStringSuffix(t *testing.T) {
-	searchStringParameter := NewParameter("q")
-	searchStringParameter.Type = SearchString
+	searchStringParameter := NewParameter("q", SearchString)
 	err := searchStringParameter.Parse("q", "alfa*")
 	if err != nil {
 		t.Fail()
@@ -145,8 +136,7 @@ func TestSearchStringSuffix(t *testing.T) {
 }
 
 func TestSearchStringPrefix(t *testing.T) {
-	searchStringParameter := NewParameter("q")
-	searchStringParameter.Type = SearchString
+	searchStringParameter := NewParameter("q", SearchString)
 	err := searchStringParameter.Parse("q", "*beta")
 	if err != nil {
 		t.Fail()
@@ -163,8 +153,7 @@ func TestSearchStringPrefix(t *testing.T) {
 }
 
 func TestSearchStringSurrounded(t *testing.T) {
-	searchStringParameter := NewParameter("q")
-	searchStringParameter.Type = SearchString
+	searchStringParameter := NewParameter("q", SearchString)
 	err := searchStringParameter.Parse("q", "*gamma*")
 	if err != nil {
 		t.Fail()
@@ -180,8 +169,7 @@ func TestSearchStringSurrounded(t *testing.T) {
 }
 
 func TestSearchStringSurroundedMaxLength(t *testing.T) {
-	searchStringParameter := NewParameter("q")
-	searchStringParameter.Type = SearchString
+	searchStringParameter := NewParameter("q", SearchString)
 	searchStringParameter.MaxLength = 3
 	err := searchStringParameter.Parse("q", "*gamma*")
 	if err.Error() != "Invalid length (5) for parameter 'q' (max 3)" {
@@ -198,8 +186,7 @@ func TestSearchStringSurroundedMaxLength(t *testing.T) {
 }
 
 func TestSearchStringSuffixedMinLength(t *testing.T) {
-	searchStringParameter := NewParameter("q")
-	searchStringParameter.Type = SearchString
+	searchStringParameter := NewParameter("q", SearchString)
 	searchStringParameter.MinLength = 3
 	err := searchStringParameter.Parse("q", "ga*")
 	if err.Error() != "Invalid length (2) for parameter 'q' (min 3)" {
@@ -216,8 +203,7 @@ func TestSearchStringSuffixedMinLength(t *testing.T) {
 }
 
 func TestSortModifierParameter(t *testing.T) {
-	sortModifierParameter := NewParameter("sort")
-	sortModifierParameter.Type = SortStrings
+	sortModifierParameter := NewParameter("sort", SortStrings)
 	sortModifierParameter.AllowedValues = []string{"age", "name", "height"}
 	err := sortModifierParameter.Parse("sort", "name,banana,should,-age,not,even,parse,height,this")
 	if err != nil {
