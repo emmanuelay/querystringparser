@@ -27,6 +27,9 @@ const (
 
 	// Integer type is an integer with restrictions
 	Integer
+
+	// Boolean type is a string which can be translated to a boolean (true = true or t/T, false = false or f/F)
+	Boolean
 )
 
 // MatchPosition denotes where in a search string the wildcard is located
@@ -95,6 +98,9 @@ type Parameter struct {
 	IntValue int
 	MinValue int
 	MaxValue int
+
+	// Boolean specific variables
+	BoolValue bool
 }
 
 // NewParameter creates a new parameter with default configuration
@@ -130,6 +136,8 @@ func (p *Parameter) Parse(key, value string) error {
 		return p.parseSearchString(key, value)
 	case Integer:
 		return p.parseInteger(key, value)
+	case Boolean:
+		return p.parseBoolean(key, value)
 	default:
 		return ErrInvalidType
 	}
@@ -276,6 +284,23 @@ func (p *Parameter) parseInteger(key, value string) error {
 	p.IntValue = val
 	p.Parsed = true
 	return nil
+}
+
+func (p *Parameter) parseBoolean(key, value string) error {
+
+	lowercaseValue := strings.ToLower(value)
+
+	if lowercaseValue == "true" || lowercaseValue == "t" {
+		p.BoolValue = true
+		return nil
+	}
+
+	if lowercaseValue == "false" || lowercaseValue == "f" {
+		p.BoolValue = false
+		return nil
+	}
+
+	return fmt.Errorf("Parameter '%v' has unrecognized value ('%v')", key, value)
 }
 
 func strToint(input string) (int, error) {

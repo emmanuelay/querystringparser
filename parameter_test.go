@@ -232,7 +232,69 @@ func TestSortModifierParameter(t *testing.T) {
 	if testEqBool(sortModifierParameter.SortDirections, []bool{true, false, true}) != true {
 		t.Error("Invalid SortDirections")
 	}
+}
 
+func TestBooleanParameterTrue(t *testing.T) {
+	boolParameter := NewParameter("active", Boolean)
+
+	err := boolParameter.Parse("active", "true")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if boolParameter.BoolValue != true {
+		t.Error("Expected 'true' value in BoolValue")
+	}
+
+	// Invert value to ensure that its set
+	boolParameter.BoolValue = false
+
+	err = boolParameter.Parse("active", "T")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if boolParameter.BoolValue != true {
+		t.Error("Expected 'true' value in BoolValue")
+	}
+}
+
+func TestBooleanParameterFalse(t *testing.T) {
+	boolParameter := NewParameter("active", Boolean)
+	err := boolParameter.Parse("active", "falsE")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if boolParameter.BoolValue != false {
+		t.Error("Expected 'false' value in BoolValue")
+	}
+
+	// Invert value to ensure that its set
+	boolParameter.BoolValue = true
+
+	err = boolParameter.Parse("active", "F")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if boolParameter.BoolValue != false {
+		t.Error("Expected 'false' value in BoolValue")
+	}
+}
+
+func TestBooleanParameterInvalid(t *testing.T) {
+	boolParameter := NewParameter("active", Boolean)
+
+	err := boolParameter.Parse("active", "trudeaux")
+	if err.Error() != "Parameter 'active' has unrecognized value ('trudeaux')" {
+		t.Fail()
+	}
+
+	err = boolParameter.Parse("active", "falsationism")
+	if err.Error() != "Parameter 'active' has unrecognized value ('falsationism')" {
+		t.Fail()
+	}
 }
 
 // https://stackoverflow.com/a/15312097/254695
