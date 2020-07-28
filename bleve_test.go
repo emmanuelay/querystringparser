@@ -14,6 +14,10 @@ func TestToBleveQuery(t *testing.T) {
 	searchStringParameter.OutputCondition = Must
 	parser.AddParameter(searchStringParameter)
 
+	activeParameter := NewParameter("active", Boolean)
+	activeParameter.OutputCondition = Must
+	parser.AddParameter(activeParameter)
+
 	ageParameter := NewParameter("age", IntegerRange)
 	ageParameter.MinValue = 0
 	ageParameter.MaxValue = 99
@@ -55,13 +59,13 @@ func TestToBleveQuery(t *testing.T) {
 	sortParameter.IncludeInOutput = false
 	parser.AddParameter(sortParameter)
 
-	queryString := "http://www.domain.com/search?q=*hello*&age=18-45&villages=alfa,beta&interests=gamma,delta&sort=-age,name,-last_online&size=100&offset=99150"
+	queryString := "http://www.domain.com/search?q=*hello*&age=18-45&active=T&villages=alfa,beta&interests=gamma,delta&sort=-age,name,-last_online&size=100&offset=99150"
 	err := parser.Parse(queryString)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if parser.ParsedParameterCount() != 7 {
+	if parser.ParsedParameterCount() != 8 {
 		t.Error("Invalid number of processed parameters")
 	}
 
@@ -70,7 +74,7 @@ func TestToBleveQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	bleveString := "+*hello* +age:>=18 +age:<=45 +profile.villages:alfa,beta +profile.interest:gamma,delta"
+	bleveString := "+*hello* +active:true +age:>=18 +age:<=45 +profile.villages:alfa,beta +profile.interest:gamma,delta"
 	if query != bleveString {
 		t.Errorf("Expected '%v' got '%v'", bleveString, query)
 	}

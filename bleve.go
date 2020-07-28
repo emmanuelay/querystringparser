@@ -46,6 +46,9 @@ func (p *Parameter) ToBleveQuery() (string, error) {
 	case Integer:
 		return fmt.Sprintf("%v%v:%v", conditionalModifier, p.OutputName, p.IntValue), nil
 
+	case Boolean:
+		return fmt.Sprintf("%v%v:%v", conditionalModifier, p.OutputName, p.BoolValue), nil
+
 	case IntegerRange:
 		return fmt.Sprintf("%v%v:>=%v %v%v:<=%v", conditionalModifier, p.OutputName, p.MinValue, conditionalModifier, p.Name, p.MaxValue), nil
 
