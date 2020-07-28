@@ -112,6 +112,23 @@ func TestIntegerParameter(t *testing.T) {
 	}
 }
 
+func TestBooleanParameter(t *testing.T) {
+	queryString := "active=true&other=notsomuch"
+
+	parser := NewParser()
+	activeParameter := NewParameter("active", Boolean)
+	parser.AddParameter(activeParameter)
+
+	err := parser.Parse(queryString)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if parser.ParsedParameterCount() != 1 {
+		t.Errorf("Invalid number of parsed parameters (%v, expected 1)", parser.ParsedParameterCount())
+	}
+}
+
 func TestDefaultIntegerParameter(t *testing.T) {
 
 	queryString := "https://www.domain.com/search?offset=1"

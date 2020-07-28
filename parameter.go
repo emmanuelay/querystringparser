@@ -287,16 +287,17 @@ func (p *Parameter) parseInteger(key, value string) error {
 }
 
 func (p *Parameter) parseBoolean(key, value string) error {
-
 	lowercaseValue := strings.ToLower(value)
 
 	if lowercaseValue == "true" || lowercaseValue == "t" {
 		p.BoolValue = true
+		p.Parsed = true
 		return nil
 	}
 
 	if lowercaseValue == "false" || lowercaseValue == "f" {
 		p.BoolValue = false
+		p.Parsed = true
 		return nil
 	}
 
