@@ -16,6 +16,19 @@ func TestStrings(t *testing.T) {
 	}
 }
 
+func TestStringsAllowed(t *testing.T) {
+	stringsParameter := NewParameter("interest", Strings)
+	stringsParameter.AllowedValues = []string{"alfa", "beta", "pika", "chu"}
+	err := stringsParameter.Parse("interest", "alfa,beta,gamma,delta,pika,beta,alfa,beta,gamma,beta")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if testEqString(stringsParameter.StringsValue, []string{"alfa", "beta", "pika"}) != true {
+		t.Error("Invalid StringsValue")
+	}
+}
+
 func TestEmptyStringsParameter(t *testing.T) {
 
 	interestParameter := NewParameter("interest", Strings)

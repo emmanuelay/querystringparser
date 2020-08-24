@@ -148,7 +148,16 @@ func (p *Parameter) parseStrings(key, value string) error {
 	if len(items) == 1 && len(items[0]) == 0 {
 		p.StringsValue = []string{}
 	} else {
-		p.StringsValue = items
+
+		if len(p.AllowedValues) > 0 {
+			for _, item := range items {
+				if (p.isAllowedValue(item)) && (!contains(p.StringsValue, item)) {
+					p.StringsValue = append(p.StringsValue, item)
+				}
+			}
+		} else {
+			p.StringsValue = items
+		}
 	}
 	p.Parsed = true
 	return nil
@@ -189,13 +198,7 @@ func (p *Parameter) isAllowedValue(value string) bool {
 		return true
 	}
 
-	for _, allowed := range p.AllowedValues {
-		if value == allowed {
-			return true
-		}
-	}
-
-	return false
+	return contains(p.AllowedValues, value)
 }
 
 func (p *Parameter) parseIntegerRange(key, value string) error {
@@ -310,4 +313,13 @@ func strToint(input string) (int, error) {
 		return 0, ErrInvalidType
 	}
 	return intValue, nil
+}
+
+func contains(list []string, item string) bool {
+	for _, v := range list {
+		if v == item {
+			return true
+		}
+	}
+	return false
 }
