@@ -266,7 +266,7 @@ func (p *Parameter) parseSearchString(key, value string) error {
 		return fmt.Errorf("Invalid length (%v) for parameter '%v' (min %v)", len(strValue), p.Name, p.MinLength)
 	}
 
-	p.StringValue = strValue
+	p.StringValue = strings.ToLower(strValue)
 	return nil
 }
 
