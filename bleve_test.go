@@ -31,7 +31,7 @@ func TestToBleveQuery(t *testing.T) {
 
 	interestParameter := NewParameter("interests", Strings)
 	interestParameter.OutputName = "profile.interest"
-	interestParameter.OutputCondition = Must
+	interestParameter.OutputCondition = Should
 	parser.AddParameter(interestParameter)
 
 	//registrationDateParameter := NewParameter("reg")
@@ -74,7 +74,7 @@ func TestToBleveQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	bleveString := "+*hello* +active:true +age:>=18 +age:<=45 +profile.villages:alfa,beta +profile.interest:gamma,delta"
+	bleveString := "+*hello* +active:true +age:>=18 +age:<=45 +profile.villages:alfa +profile.villages:beta profile.interest:gamma,delta"
 	if query != bleveString {
 		t.Errorf("Expected '%v' got '%v'", bleveString, query)
 	}

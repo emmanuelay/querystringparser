@@ -1,6 +1,7 @@
 package querystringparser
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"strings"
@@ -53,7 +54,21 @@ func (p *Parameter) ToBleveQuery() (string, error) {
 		return fmt.Sprintf("%v%v:>=%v %v%v:<=%v", conditionalModifier, p.OutputName, p.MinValue, conditionalModifier, p.Name, p.MaxValue), nil
 
 	case Strings:
-		return fmt.Sprintf("%v%v:%v", conditionalModifier, p.OutputName, strings.Join(p.StringsValue, ",")), nil
+		{
+			if p.OutputCondition == Should {
+				return fmt.Sprintf("%v%v:%v", conditionalModifier, p.OutputName, strings.Join(p.StringsValue, ",")), nil
+			}
+
+			var query bytes.Buffer
+			for _, stringValue := range p.StringsValue {
+				if query.Len() > 0 {
+					query.WriteString(" ")
+				}
+				condition := fmt.Sprintf("%v%v:%v", conditionalModifier, p.OutputName, stringValue)
+				query.WriteString(condition)
+			}
+			return query.String(), nil
+		}
 
 	case SearchString:
 		{
