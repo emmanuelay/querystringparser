@@ -102,15 +102,16 @@ func (p *Parameter) ToBleveSortSlice() ([]string, error) {
 		return nil, ErrInvalidParameter
 	}
 
-	output := []string{}
-	for idx, val := range p.StringsValue {
+	var output []string = nil
+
+	for idx, value := range p.StringsValue {
 		sortDirection := p.SortDirections[idx]
-		var item string
+		item := value
+
 		if sortDirection == false {
-			item = fmt.Sprintf("%v%v", p.SortModifierCharacter, val)
-		} else {
-			item = val
+			item = fmt.Sprintf("%v%v", p.SortModifierCharacter, value)
 		}
+
 		output = append(output, item)
 	}
 

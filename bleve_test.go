@@ -96,6 +96,26 @@ func TestToBleveQuery(t *testing.T) {
 	if intOffset != 999 {
 		t.Error("Offset should be 999")
 	}
+}
+
+func TestToBleveQuerySortSlice(t *testing.T) {
+
+	parser := NewParser()
+
+	sortParameter := NewParameter("sort", SortStrings)
+	sortParameter.AllowedValues = []string{"age", "name", "last_online"}
+	sortParameter.IncludeInOutput = false
+	parser.AddParameter(sortParameter)
+
+	queryString := "http://www.domain.com/search?sort=-age,name,-last_online"
+	err := parser.Parse(queryString)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if parser.ParsedParameterCount() != 1 {
+		t.Error("Invalid number of processed parameters")
+	}
 
 	expectedSortSlice := []string{"-age", "name", "-last_online"}
 	sortSlice, err := parser.ToBleveSortSlice("sort")
@@ -106,5 +126,71 @@ func TestToBleveQuery(t *testing.T) {
 	if !testEqString(expectedSortSlice, sortSlice) {
 		t.Errorf("Expected '%v' got '%v'", expectedSortSlice, sortSlice)
 	}
-	//fmt.Println(parser.ToBleveSortSlice("sort"))
+
+}
+
+func TestToBleveQueryEmptyUnrecognizedSortSliceValues(t *testing.T) {
+
+	parser := NewParser()
+
+	sortParameter := NewParameter("sort", SortStrings)
+	sortParameter.AllowedValues = []string{"age", "name", "last_online"}
+	sortParameter.IncludeInOutput = false
+	parser.AddParameter(sortParameter)
+
+	queryString := "http://www.domain.com/search?sort=nothing,-that,it,-can,recognize"
+	err := parser.Parse(queryString)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if parser.ParsedParameterCount() != 1 {
+		t.Error("Invalid number of processed parameters")
+	}
+
+	// Get Bleve SortSlice (array of strings with '-' character as desc prefix, ex: []strings{"-age","created_at"})
+	sortSlice, err := parser.ToBleveSortSlice("sort")
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Expects a nil value if sort is empty -or- contains unrecognized values
+	if sortSlice != nil {
+		t.Error(err)
+	}
+}
+
+func TestToBleveQueryNoSortParameter(t *testing.T) {
+
+	parser := NewParser()
+
+	sortParameter := NewParameter("sort", SortStrings)
+	sortParameter.AllowedValues = []string{"age", "name", "last_online"}
+	sortParameter.IncludeInOutput = false
+	parser.AddParameter(sortParameter)
+
+	activeParameter := NewParameter("active", Boolean)
+	activeParameter.OutputCondition = Must
+	parser.AddParameter(activeParameter)
+
+	queryString := "http://www.domain.com/search?active=t"
+	err := parser.Parse(queryString)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if parser.ParsedParameterCount() != 1 {
+		t.Error("Invalid number of processed parameters")
+	}
+
+	// Get Bleve SortSlice (array of strings with '-' character as desc prefix, ex: []strings{"-age","created_at"})
+	sortSlice, err := parser.ToBleveSortSlice("sort")
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Expects a nil value if sort is empty -or- contains unrecognized values
+	if sortSlice != nil {
+		t.Error(err)
+	}
 }
