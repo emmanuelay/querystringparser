@@ -3,6 +3,7 @@ package querystringparser
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -38,6 +39,9 @@ var (
 
 	// ErrInvalidRange ...
 	ErrInvalidRange = errors.New("Invalid range parameter")
+
+	// ErrInvalidKeyName ...
+	ErrInvalidKeyName = errors.New("Invalid or unsanitized key name")
 )
 
 // NewParser creates a Parser-instance
@@ -94,6 +98,13 @@ func (p *Parser) Parse(queryString string) error {
 		key := keyValue[0]
 		value := keyValue[1]
 
+		// Unsanitized key/values should break processing.
+		if sanitizeKey(key) != key {
+			return ErrInvalidKeyName
+		}
+
+		// Get the parameter from the list of registered parameters
+		// If its not found, its not expected - and wont be processed
 		parameter, err := p.getParameter(key)
 		if err != nil {
 			continue
@@ -145,4 +156,12 @@ func (p *Parser) ParsedParameterCount() int {
 		}
 	}
 	return counter
+}
+
+// Alphanum, underscore and dot
+var escapePattern = regexp.MustCompile("[^a-z0-9_.]*")
+
+func sanitizeKey(input string) string {
+	lowercaseInput := strings.ToLower(input)
+	return escapePattern.ReplaceAllString(lowercaseInput, "")
 }

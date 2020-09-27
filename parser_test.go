@@ -172,3 +172,31 @@ func TestDefaultIntegerParameter(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSanitizeKey(t *testing.T) {
+	name := "alFaBetic_tHInG åÅäÖöÄ !$\"€%/'--&//()#)€#!_123_ '--DROP TABLE"
+	output := sanitizeKey(name)
+	expectedOutput := "alfabetic_thing_123_droptable"
+	if output != expectedOutput {
+		t.Errorf("Expected '%v' got '%v'", expectedOutput, output)
+	}
+}
+
+func TestUnsanitizedParameter(t *testing.T) {
+	queryString := "https://www.domain.com/search?offSET=10"
+
+	parser := NewParser()
+
+	offsetParameter := NewParameter("offset", Integer)
+	offsetParameter.DefaultIntValue = 0
+	offsetParameter.MinValue = 0
+	offsetParameter.MaxValue = 1000
+	offsetParameter.IncludeInOutput = false
+	parser.AddParameter(offsetParameter)
+
+	err := parser.Parse(queryString)
+	if err != ErrInvalidKeyName {
+		t.Error("Should fail due to unsanitized key name")
+	}
+
+}
