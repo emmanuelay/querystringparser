@@ -53,6 +53,18 @@ func (p *Parameter) ToBleveQuery() (string, error) {
 	case IntegerRange:
 		return fmt.Sprintf("%v%v:>=%v %v%v:<=%v", conditionalModifier, p.OutputName, p.MinValue, conditionalModifier, p.Name, p.MaxValue), nil
 
+	case DateRange:
+		{
+			parts := []string{}
+			if !p.DateMinValue.IsZero() {
+				parts = append(parts, fmt.Sprintf("%v%v:>=%v", conditionalModifier, p.OutputName, p.DateMinValue.Format(defaultDateFormat)))
+			}
+			if !p.DateMaxValue.IsZero() {
+				parts = append(parts, fmt.Sprintf("%v%v:<=%v", conditionalModifier, p.OutputName, p.DateMaxValue.Format(defaultDateFormat)))
+			}
+			return strings.Join(parts, " "), nil
+		}
+
 	case Strings:
 		{
 			var query bytes.Buffer

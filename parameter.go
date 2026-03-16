@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Type is an enum to denote different types of parameters
@@ -30,6 +31,10 @@ const (
 
 	// Boolean type is a string which can be translated to a boolean (true = true or t/T, false = false or f/F)
 	Boolean
+
+	// DateRange type is a parameter that restricts input to a date range
+	// Ex: range=20200101-20200304 -or- range=-20200304 -or- range=20200101-
+	DateRange
 )
 
 // MatchPosition denotes where in a search string the wildcard is located
@@ -101,6 +106,11 @@ type Parameter struct {
 
 	// Boolean specific variables
 	BoolValue bool
+
+	// DateRange specific variables
+	DateFormat   string
+	DateMinValue time.Time
+	DateMaxValue time.Time
 }
 
 // NewParameter creates a new parameter with default configuration
@@ -117,6 +127,7 @@ func NewParameter(parameter string, parameterType Type) Parameter {
 		MinLength:               1,
 		MaxLength:               100,
 		OutputCondition:         Should,
+		DateFormat:              defaultDateFormat,
 	}
 }
 
@@ -138,6 +149,8 @@ func (p *Parameter) Parse(key, value string) error {
 		return p.parseInteger(key, value)
 	case Boolean:
 		return p.parseBoolean(key, value)
+	case DateRange:
+		return p.parseDateRange(key, value)
 	default:
 		return ErrInvalidType
 	}
@@ -305,6 +318,39 @@ func (p *Parameter) parseBoolean(key, value string) error {
 	}
 
 	return fmt.Errorf("Parameter '%v' has unrecognized value ('%v')", key, value)
+}
+
+func (p *Parameter) parseDateRange(key, value string) error {
+	rangePair := strings.Split(value, p.RangeSeparatorCharacter)
+	if len(rangePair) == 1 {
+		return ErrInvalidDateRange
+	}
+
+	minDate := rangePair[0]
+	maxDate := rangePair[1]
+
+	if len(minDate) > 0 {
+		parsed, err := time.Parse(p.DateFormat, minDate)
+		if err != nil {
+			return fmt.Errorf("Invalid date format in min-range value '%v' for parameter '%v'", minDate, p.Name)
+		}
+		p.DateMinValue = parsed
+	}
+
+	if len(maxDate) > 0 {
+		parsed, err := time.Parse(p.DateFormat, maxDate)
+		if err != nil {
+			return fmt.Errorf("Invalid date format in max-range value '%v' for parameter '%v'", maxDate, p.Name)
+		}
+		p.DateMaxValue = parsed
+	}
+
+	if !p.DateMinValue.IsZero() && !p.DateMaxValue.IsZero() && p.DateMinValue.After(p.DateMaxValue) {
+		p.DateMinValue, p.DateMaxValue = p.DateMaxValue, p.DateMinValue
+	}
+
+	p.Parsed = true
+	return nil
 }
 
 func strToint(input string) (int, error) {

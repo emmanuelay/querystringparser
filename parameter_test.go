@@ -2,6 +2,7 @@ package querystringparser
 
 import (
 	"testing"
+	"time"
 )
 
 func TestStrings(t *testing.T) {
@@ -307,6 +308,94 @@ func TestBooleanParameterInvalid(t *testing.T) {
 	err = boolParameter.Parse("active", "falsationism")
 	if err.Error() != "Parameter 'active' has unrecognized value ('falsationism')" {
 		t.Fail()
+	}
+}
+
+func TestDateRangeExplicit(t *testing.T) {
+	dateRangeParameter := NewParameter("reg", DateRange)
+	err := dateRangeParameter.Parse("reg", "20200101-20200304")
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedMin := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	expectedMax := time.Date(2020, 3, 4, 0, 0, 0, 0, time.UTC)
+
+	if !dateRangeParameter.DateMinValue.Equal(expectedMin) {
+		t.Errorf("Expected DateMinValue %v, got %v", expectedMin, dateRangeParameter.DateMinValue)
+	}
+
+	if !dateRangeParameter.DateMaxValue.Equal(expectedMax) {
+		t.Errorf("Expected DateMaxValue %v, got %v", expectedMax, dateRangeParameter.DateMaxValue)
+	}
+}
+
+func TestDateRangeImplicitMin(t *testing.T) {
+	dateRangeParameter := NewParameter("reg", DateRange)
+	err := dateRangeParameter.Parse("reg", "-20200304")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !dateRangeParameter.DateMinValue.IsZero() {
+		t.Errorf("Expected zero DateMinValue, got %v", dateRangeParameter.DateMinValue)
+	}
+
+	expectedMax := time.Date(2020, 3, 4, 0, 0, 0, 0, time.UTC)
+	if !dateRangeParameter.DateMaxValue.Equal(expectedMax) {
+		t.Errorf("Expected DateMaxValue %v, got %v", expectedMax, dateRangeParameter.DateMaxValue)
+	}
+}
+
+func TestDateRangeImplicitMax(t *testing.T) {
+	dateRangeParameter := NewParameter("reg", DateRange)
+	err := dateRangeParameter.Parse("reg", "20200101-")
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedMin := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	if !dateRangeParameter.DateMinValue.Equal(expectedMin) {
+		t.Errorf("Expected DateMinValue %v, got %v", expectedMin, dateRangeParameter.DateMinValue)
+	}
+
+	if !dateRangeParameter.DateMaxValue.IsZero() {
+		t.Errorf("Expected zero DateMaxValue, got %v", dateRangeParameter.DateMaxValue)
+	}
+}
+
+func TestDateRangeSwapped(t *testing.T) {
+	dateRangeParameter := NewParameter("reg", DateRange)
+	err := dateRangeParameter.Parse("reg", "20200304-20200101")
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedMin := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	expectedMax := time.Date(2020, 3, 4, 0, 0, 0, 0, time.UTC)
+
+	if !dateRangeParameter.DateMinValue.Equal(expectedMin) {
+		t.Errorf("Expected DateMinValue %v, got %v", expectedMin, dateRangeParameter.DateMinValue)
+	}
+
+	if !dateRangeParameter.DateMaxValue.Equal(expectedMax) {
+		t.Errorf("Expected DateMaxValue %v, got %v", expectedMax, dateRangeParameter.DateMaxValue)
+	}
+}
+
+func TestDateRangeInvalidFormat(t *testing.T) {
+	dateRangeParameter := NewParameter("reg", DateRange)
+	err := dateRangeParameter.Parse("reg", "2020-01-01-2020-03-04")
+	if err == nil {
+		t.Error("Expected error for invalid date format")
+	}
+}
+
+func TestDateRangeNoSeparator(t *testing.T) {
+	dateRangeParameter := NewParameter("reg", DateRange)
+	err := dateRangeParameter.Parse("reg", "20200101")
+	if err != ErrInvalidDateRange {
+		t.Errorf("Expected ErrInvalidDateRange, got %v", err)
 	}
 }
 

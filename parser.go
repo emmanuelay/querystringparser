@@ -22,6 +22,7 @@ const (
 	rangeSeparatorCharacter     = "-"
 	listSeparatorCharacter      = ","
 	sortModifierCharacter       = "-"
+	defaultDateFormat           = "20060102"
 )
 
 var (
@@ -42,6 +43,12 @@ var (
 
 	// ErrInvalidKeyName ...
 	ErrInvalidKeyName = errors.New("Invalid or unsanitized key name")
+
+	// ErrInvalidDateFormat ...
+	ErrInvalidDateFormat = errors.New("Invalid date format")
+
+	// ErrInvalidDateRange ...
+	ErrInvalidDateRange = errors.New("Invalid date range parameter")
 )
 
 // NewParser creates a Parser-instance

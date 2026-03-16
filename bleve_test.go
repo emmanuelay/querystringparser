@@ -34,11 +34,10 @@ func TestToBleveQuery(t *testing.T) {
 	interestParameter.OutputCondition = Should
 	parser.AddParameter(interestParameter)
 
-	//registrationDateParameter := NewParameter("reg")
-	//registrationDateParameter.OutputName = "created_at"
-	//registrationDateParameter.Type = type.DateRange
-	//registrationDateParameter.DateFormat = "yyyyMMdd"
-	//parser.AddParameter(registrationDateParameter)
+	registrationDateParameter := NewParameter("reg", DateRange)
+	registrationDateParameter.OutputName = "created_at"
+	registrationDateParameter.OutputCondition = Must
+	parser.AddParameter(registrationDateParameter)
 
 	offsetParameter := NewParameter("offset", Integer)
 	offsetParameter.DefaultIntValue = 0
@@ -59,13 +58,13 @@ func TestToBleveQuery(t *testing.T) {
 	sortParameter.IncludeInOutput = false
 	parser.AddParameter(sortParameter)
 
-	queryString := "http://www.domain.com/search?q=*hello*&age=18-45&active=T&villages=alfa,beta&interests=gamma,delta&sort=-age,name,-last_online&size=100&offset=99150"
+	queryString := "http://www.domain.com/search?q=*hello*&age=18-45&active=T&villages=alfa,beta&interests=gamma,delta&reg=20200101-20200304&sort=-age,name,-last_online&size=100&offset=99150"
 	err := parser.Parse(queryString)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if parser.ParsedParameterCount() != 8 {
+	if parser.ParsedParameterCount() != 9 {
 		t.Error("Invalid number of processed parameters")
 	}
 
@@ -74,7 +73,7 @@ func TestToBleveQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	bleveString := "+*hello* +active:true +age:>=18 +age:<=45 +profile.villages:alfa +profile.villages:beta profile.interest:gamma profile.interest:delta"
+	bleveString := "+*hello* +active:true +age:>=18 +age:<=45 +profile.villages:alfa +profile.villages:beta profile.interest:gamma profile.interest:delta +created_at:>=20200101 +created_at:<=20200304"
 	if query != bleveString {
 		t.Errorf("Expected '%v' got '%v'", bleveString, query)
 	}
@@ -95,6 +94,54 @@ func TestToBleveQuery(t *testing.T) {
 
 	if intOffset != 999 {
 		t.Error("Offset should be 999")
+	}
+}
+
+func TestToBleveQueryDateRangeImplicitMin(t *testing.T) {
+	parser := NewParser()
+
+	regParameter := NewParameter("reg", DateRange)
+	regParameter.OutputName = "created_at"
+	regParameter.OutputCondition = Must
+	parser.AddParameter(regParameter)
+
+	err := parser.Parse("reg=-20200304")
+	if err != nil {
+		t.Error(err)
+	}
+
+	query, err := parser.ToBleveQuery()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := "+created_at:<=20200304"
+	if query != expected {
+		t.Errorf("Expected '%v' got '%v'", expected, query)
+	}
+}
+
+func TestToBleveQueryDateRangeImplicitMax(t *testing.T) {
+	parser := NewParser()
+
+	regParameter := NewParameter("reg", DateRange)
+	regParameter.OutputName = "created_at"
+	regParameter.OutputCondition = Must
+	parser.AddParameter(regParameter)
+
+	err := parser.Parse("reg=20200101-")
+	if err != nil {
+		t.Error(err)
+	}
+
+	query, err := parser.ToBleveQuery()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := "+created_at:>=20200101"
+	if query != expected {
+		t.Errorf("Expected '%v' got '%v'", expected, query)
 	}
 }
 
