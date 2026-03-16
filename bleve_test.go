@@ -145,6 +145,64 @@ func TestToBleveQueryDateRangeImplicitMax(t *testing.T) {
 	}
 }
 
+func TestToBleveQueryShouldDisjunction(t *testing.T) {
+	parser := NewParser()
+
+	gender := NewParameter("gender", Strings)
+	gender.AllowedValues = []string{"true", "false"}
+	gender.OutputCondition = Must
+	parser.AddParameter(gender)
+
+	visibility := NewParameter("visibility", Strings)
+	visibility.AllowedValues = []string{"pending", "suspended", "banned", "inactive"}
+	visibility.OutputCondition = Should
+	parser.AddParameter(visibility)
+
+	err := parser.Parse("gender=true&visibility=pending,suspended")
+	if err != nil {
+		t.Error(err)
+	}
+
+	query, err := parser.ToBleveQuery()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := "+gender:true +(visibility:pending visibility:suspended)"
+	if query != expected {
+		t.Errorf("Expected '%v' got '%v'", expected, query)
+	}
+}
+
+func TestToBleveQueryShouldSingleValue(t *testing.T) {
+	parser := NewParser()
+
+	gender := NewParameter("gender", Strings)
+	gender.AllowedValues = []string{"true", "false"}
+	gender.OutputCondition = Must
+	parser.AddParameter(gender)
+
+	visibility := NewParameter("visibility", Strings)
+	visibility.AllowedValues = []string{"pending", "suspended", "banned", "inactive"}
+	visibility.OutputCondition = Should
+	parser.AddParameter(visibility)
+
+	err := parser.Parse("gender=true&visibility=pending")
+	if err != nil {
+		t.Error(err)
+	}
+
+	query, err := parser.ToBleveQuery()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := "+gender:true +(visibility:pending)"
+	if query != expected {
+		t.Errorf("Expected '%v' got '%v'", expected, query)
+	}
+}
+
 func TestToBleveQuerySortSlice(t *testing.T) {
 
 	parser := NewParser()
