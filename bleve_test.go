@@ -74,7 +74,7 @@ func TestToBleveQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	bleveString := "+*hello* +active:true +age:>=18 +age:<=45 +profile.villages:alfa +profile.villages:beta profile.interest:gamma,delta"
+	bleveString := "+*hello* +active:true +age:>=18 +age:<=45 +profile.villages:alfa +profile.villages:beta profile.interest:gamma profile.interest:delta"
 	if query != bleveString {
 		t.Errorf("Expected '%v' got '%v'", bleveString, query)
 	}

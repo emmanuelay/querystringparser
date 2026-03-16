@@ -55,10 +55,6 @@ func (p *Parameter) ToBleveQuery() (string, error) {
 
 	case Strings:
 		{
-			if p.OutputCondition == Should {
-				return fmt.Sprintf("%v%v:%v", conditionalModifier, p.OutputName, strings.Join(p.StringsValue, ",")), nil
-			}
-
 			var query bytes.Buffer
 			for _, stringValue := range p.StringsValue {
 				if query.Len() > 0 {
