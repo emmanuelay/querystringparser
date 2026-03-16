@@ -75,6 +75,12 @@ func (p *Parameter) ToBleveQuery() (string, error) {
 				condition := fmt.Sprintf("%v%v:%v", conditionalModifier, p.OutputName, stringValue)
 				query.WriteString(condition)
 			}
+			// Wrap Should with multiple values in a required disjunction
+			// group so Bleve treats it as "must match any":
+			// +(field:val1 field:val2)
+			if p.OutputCondition == Should && len(p.StringsValue) > 1 {
+				return "+(" + query.String() + ")", nil
+			}
 			return query.String(), nil
 		}
 
